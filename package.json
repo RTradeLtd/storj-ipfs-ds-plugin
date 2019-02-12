@@ -1,0 +1,26 @@
+{
+  "author": "solidity",
+  "bugs": {
+    "url": "github.com/RTradeLtd/storj-ipfs-ds-plugins"
+  },
+  "gxDependencies": [
+    {
+      "hash": "QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r",
+      "name": "go-ipfs",
+      "version": "0.4.18"
+    },
+    {
+      "author": "jbenet",
+      "hash": "QmUadX5EcvrBmxAV9sE7wUWtWSqxns5K84qKJBixmcT1w9",
+      "name": "go-datastore",
+      "version": "3.6.1"
+    }
+  ],
+  "gxVersion": "0.14.0",
+  "language": "golang",
+  "license": "",
+  "name": "storj-ipfs-ds-plugin",
+  "releaseCmd": "git commit -a -m \"gx publish $VERSION\"",
+  "version": "0.0.0"
+}
+
