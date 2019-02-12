@@ -21,7 +21,7 @@ vendor:
 	dep ensure -v -update
 
 	cp -r /tmp/gx vendor/gx
-	
+	rm -rf vendor/gx/gx
 	# Remove problematic dependencies
 	find . -name test-vectors -type d -exec rm -r {} +
 	@echo "===================          done           ==================="
