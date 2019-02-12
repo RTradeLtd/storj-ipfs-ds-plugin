@@ -178,6 +178,21 @@ func (d *Datastore) Close() error {
 
 // S3 FUNCTION CALLS
 
+// BucketExists is used to lookup if the designated bucket exists
+func (d *Datastore) BucketExists(name string) error {
+	listParam := &s3.ListBucketsInput{}
+	out, err := d.S3.ListBuckets(listParam)
+	if err != nil {
+		return err
+	}
+	for _, v := range out.Buckets {
+		if *v.Name == name {
+			return nil
+		}
+	}
+	return ds.ErrNotFound
+}
+
 // CreateBucket is used to create a bucket
 func (d *Datastore) CreateBucket(name string) error {
 	createParam := &s3.CreateBucketInput{

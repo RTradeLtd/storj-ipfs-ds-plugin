@@ -46,6 +46,12 @@ func Test_Datastore(t *testing.T) {
 	if err := d.CreateBucket(d.Config.Bucket); err != nil {
 		t.Fatal(err)
 	}
+	if err := d.BucketExists(d.Config.Bucket); err != nil {
+		t.Fatal(err)
+	}
+	if err := d.BucketExists("randombucketname"); err == nil {
+		t.Fatal("expected error")
+	}
 	defer d.DeleteBucket(d.Config.Bucket)
 
 	t.Run("basic operations", func(t *testing.T) {
