@@ -1,10 +1,10 @@
-package gateway
+package s3
 
 import (
 	"bytes"
 	"fmt"
-	ds "gx/ipfs/QmUadX5EcvrBmxAV9sE7wUWtWSqxns5K84qKJBixmcT1w9/go-datastore"
-	dsq "gx/ipfs/QmUadX5EcvrBmxAV9sE7wUWtWSqxns5K84qKJBixmcT1w9/go-datastore/query"
+	ds "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore"
+	dsq "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore/query"
 	"io/ioutil"
 	"path"
 
@@ -26,14 +26,13 @@ func NewDatastore(cfg Config) (*Datastore, error) {
 		DisableSSL:       aws.Bool(cfg.Secure),
 		S3ForcePathStyle: aws.Bool(true),
 	}
-	s3Session := session.New(s3Config)
+	s3Session, err := session.NewSession(s3Config)
+	if err != nil {
+		return nil, err
+	}
 	d := &Datastore{
 		Config: cfg,
 		S3:     s3.New(s3Session),
-	}
-	// create the bucket we want to store things in
-	if err := d.CreateBucket(cfg.Bucket); err != nil {
-		return nil, err
 	}
 	return d, nil
 }
@@ -108,11 +107,11 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 	}
 
 	limit := q.Limit + q.Offset
-	/*	TODO: we may/may not need to add
-		if limit == 0 || limit > listMax {
-			limit = listMax
-		}
-	*/
+	// disabling this makes tests fail, so we should
+	// investigate what exactly disabling this does
+	if limit == 0 || limit > listMax {
+		limit = listMax
+	}
 	resp, err := d.S3.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket:  aws.String(d.Bucket),
 		Prefix:  aws.String(d.s3Path(q.Prefix)),
@@ -164,6 +163,17 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 		},
 		Next: nextValue,
 	}), nil
+}
+
+// Batch is a batched operation for storing data
+// WIP
+func (d *Datastore) Batch() (ds.Batch, error) {
+	return nil, nil
+}
+
+// Close is needed to satisfy the datastore interface
+func (d *Datastore) Close() error {
+	return nil
 }
 
 // S3 FUNCTION CALLS

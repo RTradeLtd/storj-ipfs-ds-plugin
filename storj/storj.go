@@ -3,6 +3,10 @@ package storj
 import (
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/plugin"
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo"
+
+	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo"
+
+	"github.com/RTradeLtd/storj-ipfs-ds-plugin/s3"
 )
 
 // SJPlugin is used to allow storj nodes
@@ -42,4 +46,24 @@ func (sp *SJPlugin) DatastoreTypeName() string {
 // DatastoreConfigParser returns a configuration parser for storj datastore
 func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 	return nil
+}
+
+// DSConfig is the configuration for our datastore
+type DSConfig struct {
+	cfg s3.Config
+}
+
+// DiskSpec returns the disk specification of our s3 datastore
+func (dsc *DSConfig) DiskSpec() fsrepo.DiskSpec {
+	return map[string]interface{}{
+		"bucket":        dsc.cfg.Bucket,
+		"region":        dsc.cfg.Region,
+		"endpoint":      dsc.cfg.Endpoint,
+		"rootDirectory": dsc.cfg.RootDirectory,
+	}
+}
+
+// Create is used to create our s3 datastore
+func (dsc *DSConfig) Create(path string) (repo.Datastore, error) {
+	return s3.NewDatastore(dsc.cfg)
 }

@@ -1,6 +1,7 @@
-package gateway
+package s3
 
 import (
+	dstest "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore/test"
 	"os"
 	"testing"
 )
@@ -32,7 +33,7 @@ func Test_New_Config(t *testing.T) {
 	}
 }
 
-func Test_New_Datastore(t *testing.T) {
+func Test_Datastore(t *testing.T) {
 	if !testing.Short() {
 		accessKey = storjAccessKey
 		secretKey = storjSecretKey
@@ -42,13 +43,20 @@ func Test_New_Datastore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := d.DeleteBucket(d.Config.Bucket); err != nil {
-		t.Fatal(err)
-	}
 	if err := d.CreateBucket(d.Config.Bucket); err != nil {
 		t.Fatal(err)
 	}
-	if err := d.DeleteBucket(d.Config.Bucket); err != nil {
-		t.Fatal(err)
-	}
+	defer d.DeleteBucket(d.Config.Bucket)
+
+	t.Run("basic operations", func(t *testing.T) {
+		dstest.SubtestBasicPutGet(t, d)
+	})
+
+	t.Run("not found operations", func(t *testing.T) {
+		dstest.SubtestNotFounds(t, d)
+	})
+
+	t.Run("many puts and gets, query", func(t *testing.T) {
+		dstest.SubtestManyKeysAndQuery(t, d)
+	})
 }
