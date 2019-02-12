@@ -1,6 +1,14 @@
 IPFSVERSION=v0.4.18
 
 
+.PHONY: testenv
+testenv:
+	(cd testenv ; make testenv)
+
+.PHONY: stop-testenv
+stop-testenv:
+	(cd testenv ; make clean)
+	
 # Rebuild vendored dependencies
 .PHONY: vendor
 vendor:
