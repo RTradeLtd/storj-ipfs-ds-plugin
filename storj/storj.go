@@ -65,5 +65,14 @@ func (dsc *DSConfig) DiskSpec() fsrepo.DiskSpec {
 
 // Create is used to create our s3 datastore
 func (dsc *DSConfig) Create(path string) (repo.Datastore, error) {
-	return s3.NewDatastore(dsc.cfg)
+	d, err := s3.NewDatastore(dsc.cfg)
+	if err != nil {
+		return nil, err
+	}
+	if err := d.BucketExists(dsc.cfg.Bucket); err != nil {
+		if err := d.CreateBucket(dsc.cfg.Bucket); err != nil {
+			return nil, err
+		}
+	}
+	return d, nil
 }
