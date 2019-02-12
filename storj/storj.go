@@ -1,6 +1,7 @@
 package storj
 
 import (
+	"fmt"
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/plugin"
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo"
 
@@ -45,7 +46,58 @@ func (sp *SJPlugin) DatastoreTypeName() string {
 
 // DatastoreConfigParser returns a configuration parser for storj datastore
 func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
-	return nil
+	return func(m map[string]interface{}) (fsrepo.DatastoreConfig, error) {
+		accessKey := m["accessKey"]
+		if accessKey == nil {
+			accessKey = ""
+		}
+
+		secretKey := m["secretKey"]
+		if secretKey == nil {
+			secretKey = ""
+		}
+
+		bucket, ok := m["bucket"].(string)
+		if !ok {
+			return nil, fmt.Errorf("ds-storj: unable to convert bucket to string type")
+		}
+		if bucket == "" {
+			return nil, fmt.Errorf("ds-storj: bucket configuration is empty")
+		}
+
+		region, ok := m["region"].(string)
+		if !ok {
+			return nil, fmt.Errorf("ds-storj: unable to convert region to string type")
+		}
+		if region == "" {
+			return nil, fmt.Errorf("ds-storj: region configuration is empty")
+		}
+
+		endpoint, ok := m["endpoint"].(string)
+		if !ok {
+			return nil, fmt.Errorf("ds-storj: unable to convert endpoint to string type")
+		}
+		if endpoint == "" {
+			return nil, fmt.Errorf("ds-storj: endpoint configuration is empty")
+		}
+
+		rootDirectory, ok := m["rootDirectory"].(string)
+		if !ok {
+			return nil, fmt.Errorf("ds-storj: unable to convert rootDirectory to string type")
+		}
+		// permit empty string for root directory
+
+		return &DSConfig{
+			cfg: s3.Config{
+				AccessKey:     accessKey.(string),
+				SecretKey:     secretKey.(string),
+				Bucket:        bucket,
+				Region:        region,
+				Endpoint:      endpoint,
+				RootDirectory: rootDirectory,
+			},
+		}, nil
+	}
 }
 
 // DSConfig is the configuration for our datastore
