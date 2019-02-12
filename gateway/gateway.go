@@ -3,41 +3,63 @@ package gateway
 import (
 	"bytes"
 	ds "gx/ipfs/QmUadX5EcvrBmxAV9sE7wUWtWSqxns5K84qKJBixmcT1w9/go-datastore"
+	"path"
 
-	minio "github.com/minio/minio-go"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-// NewDataStore is used to initialize our connection to minio, creating our datastore wrapper
-func NewDataStore(endpoint, accessKeyID, secretAccessKey string, secure bool) (*Datastore, error) {
-	// connect to minio
-	mini, err := minio.New(endpoint, accessKeyID, secretAccessKey, secure)
-	if err != nil {
+// NewDatastore is used to create our datastore against the minio gateway powered by storj
+func NewDatastore(cfg Config) (*Datastore, error) {
+	// Configure to use Minio Server
+	s3Config := &aws.Config{
+		// TODO: determine if we need session token
+		Credentials:      credentials.NewStaticCredentials(cfg.AccessKey, cfg.SecretKey, ""),
+		Endpoint:         aws.String(cfg.Endpoint),
+		Region:           aws.String(cfg.Region),
+		DisableSSL:       aws.Bool(cfg.Secure),
+		S3ForcePathStyle: aws.Bool(true),
+	}
+	s3Session := session.New(s3Config)
+	s3Client := s3.New(s3Session)
+	createParam := &s3.CreateBucketInput{
+		Bucket: aws.String(cfg.Bucket),
+	}
+
+	if _, err := s3Client.CreateBucket(createParam); err != nil {
 		return nil, err
 	}
-	// verify our connection
-	if _, err := mini.ListBuckets(); err != nil {
-		return nil, err
-	}
-	// return our datastore wrapper
 	return &Datastore{
-		Client: mini,
-		Bucket: defaultBucket,
+		Config: cfg,
+		Store:  s3Client,
 	}, nil
 }
 
-// Put is used to store an object in our minio backend connect to storj
+// NewConfig is used to generate a config with defaults
+func NewConfig(accessKey, secretKey string) Config {
+	return Config{
+		AccessKey:     accessKey,
+		SecretKey:     secretKey,
+		Bucket:        defaultBucket,
+		Endpoint:      "http://127.0.0.1:9000",
+		RootDirectory: "",
+		Secure:        false,
+	}
+}
+
+// Put is used to store some data
 func (d *Datastore) Put(k ds.Key, value []byte) error {
-	_, err := d.Client.PutObject(d.Bucket, k.Name(), bytes.NewReader(value), int64(len(value)), minio.PutObjectOptions{})
+	_, err := d.Store.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(d.Bucket),
+		Key:    aws.String(d.s3Path(k.String())),
+		Body:   bytes.NewReader(value),
+	})
 	return err
 }
 
-/*
-func (s *S3Bucket) Put(k ds.Key, value []byte) error {
-	_, err := s.S3.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(s.Bucket),
-		Key:    aws.String(s.s3Path(k.String())),
-		Body:   bytes.NewReader(value),
-	})
-	return parseError(err)
+// TODO: not sure if we need this, borrowing from the go-s3-ds ipfs repo
+func (d *Datastore) s3Path(p string) string {
+	return path.Join(d.RootDirectory, p)
 }
-*/

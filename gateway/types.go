@@ -1,15 +1,26 @@
 package gateway
 
-import (
-	minio "github.com/minio/minio-go"
-)
+import "github.com/aws/aws-sdk-go/service/s3"
 
 const (
-	defaultBucket = "us-east-1"
+	defaultRegion = "us-east-1"
+	defaultBucket = "ipfs-datastore"
 )
 
 // Datastore is our interface to minio
 type Datastore struct {
-	Client *minio.Client
-	Bucket string
+	Store *s3.S3
+	Config
+}
+
+// Config is used to configure our gateway
+type Config struct {
+	AccessKey string
+	SecretKey string
+	//	SessionToken   string
+	Bucket        string
+	Region        string
+	Endpoint      string
+	RootDirectory string
+	Secure        bool
 }
