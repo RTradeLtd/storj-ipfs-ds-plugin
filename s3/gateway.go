@@ -183,7 +183,7 @@ func (d *Datastore) BucketExists(name string) error {
 	listParam := &s3.ListBucketsInput{}
 	out, err := d.S3.ListBuckets(listParam)
 	if err != nil {
-		return err
+		return parseError(err)
 	}
 	for _, v := range out.Buckets {
 		if *v.Name == name {
@@ -200,7 +200,7 @@ func (d *Datastore) CreateBucket(name string) error {
 	}
 	// create bucket ensure we have initialize client correct
 	_, err := d.S3.CreateBucket(createParam)
-	return err
+	return parseError(err)
 }
 
 // DeleteBucket is used to remove the specified bucket
@@ -209,7 +209,7 @@ func (d *Datastore) DeleteBucket(name string) error {
 		Bucket: aws.String(name),
 	}
 	_, err := d.S3.DeleteBucket(deleteParam)
-	return err
+	return parseError(err)
 }
 
 // HELPER FUNCTION CALLS
@@ -223,5 +223,5 @@ func parseError(err error) error {
 	if s3Err, ok := err.(awserr.Error); ok && s3Err.Code() == s3.ErrCodeNoSuchKey {
 		return ds.ErrNotFound
 	}
-	return nil
+	return err
 }
