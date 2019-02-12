@@ -219,6 +219,7 @@ func (d *Datastore) s3Path(p string) string {
 	return path.Join(d.RootDirectory, p)
 }
 
+// bubble up the error, otherwise it will return nil
 func parseError(err error) error {
 	if s3Err, ok := err.(awserr.Error); ok && s3Err.Code() == s3.ErrCodeNoSuchKey {
 		return ds.ErrNotFound
