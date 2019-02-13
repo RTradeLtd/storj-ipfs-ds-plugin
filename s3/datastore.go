@@ -165,15 +165,17 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 	}), nil
 }
 
-// Batch is a batched operation for storing data
-// WIP
-func (d *Datastore) Batch() (ds.Batch, error) {
-	return nil, nil
-}
-
 // Close is needed to satisfy the datastore interface
 func (d *Datastore) Close() error {
 	return nil
+}
+
+// Batch is a batched datastore operations
+func (d *Datastore) Batch() (ds.Batch, error) {
+	return &dBatch{
+		d:   d,
+		ops: make(map[string]dBatchOp),
+	}, nil
 }
 
 // S3 FUNCTION CALLS

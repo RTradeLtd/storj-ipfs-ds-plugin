@@ -2,10 +2,22 @@
 
 go-ipfs plugin to use STORJ as the storage backend
 
-## what works and doesn't work
+## what works
 
-* currently all that works is basic daemon running
-* any datastore operations (put for example) do not work yet as there is no Batch operation system yet
+* basic daemon run
+* `ipfs pin` commands
+
+## what works'ish
+
+* `ipfs add`
+  * noticing something which requires calling `ipfs add` multiple times in order for something to be successfully added.
+
+## what doesnt work
+
+* data stored isn't saved across daemon restarts
+
+
+## demo 
 
 short video of daemon operation:
 https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG
@@ -44,6 +56,7 @@ https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5
             "region": "us-east-1",
             "endpoint": "127.0.0.1:9000",
             "rootDirectory": "",
+            "workers" "100",
             "type": "storj"
           },
           "mountpoint": "/blocks",

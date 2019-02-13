@@ -1,6 +1,10 @@
 package s3
 
-import "github.com/aws/aws-sdk-go/service/s3"
+import (
+	ds "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore"
+
+	"github.com/aws/aws-sdk-go/service/s3"
+)
 
 const (
 	defaultRegion = "us-east-1"
@@ -12,6 +16,9 @@ const (
 	// deleteMax is the largest amount of objects you can delete from S3 in a
 	// delete objects call.
 	deleteMax = 1000
+
+	// used to represetn the number of concurrent batch jobs
+	defaultWorkers = 100
 )
 
 // Datastore is our interface to minio
@@ -30,17 +37,20 @@ type Config struct {
 	Endpoint      string
 	RootDirectory string
 	Secure        bool
+	Workers       int
 }
 
-// NewConfig is used to generate a config with defaults
-func NewConfig(accessKey, secretKey string) Config {
-	return Config{
-		AccessKey:     accessKey,
-		SecretKey:     secretKey,
-		Bucket:        defaultBucket,
-		Region:        defaultRegion,
-		Endpoint:      "http://127.0.0.1:9000",
-		RootDirectory: "",
-		Secure:        false,
-	}
+// dBatch is used to handle batch based operations
+type dBatch struct {
+	d       *Datastore
+	ops     map[string]dBatchOp
+	workers int
 }
+
+// dBatchOp is a single batch operation
+type dBatchOp struct {
+	val    []byte
+	delete bool
+}
+
+var _ ds.Batching = (*Datastore)(nil)
