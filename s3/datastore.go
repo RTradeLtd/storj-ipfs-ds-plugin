@@ -170,29 +170,12 @@ func (d *Datastore) Close() error {
 	return nil
 }
 
-// BATCH OPERATIONS
-
 // Batch is a batched datastore operations
 func (d *Datastore) Batch() (ds.Batch, error) {
 	return &dBatch{
 		d:   d,
 		ops: make(map[string]dBatchOp),
 	}, nil
-}
-
-// Put is a batch based put operation
-func (db *dBatch) Put(k ds.Key, val []byte) error {
-	return nil
-}
-
-// Delete is a batch based delete operation
-func (db *dBatch) Delete(k ds.Key) error {
-	return nil
-}
-
-// Commit is used to commit batch operations and finalize their actions
-func (db *dBatch) Commit() error {
-	return nil
 }
 
 // S3 FUNCTION CALLS

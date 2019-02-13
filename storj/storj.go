@@ -56,7 +56,10 @@ func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 		if secretKey == nil {
 			secretKey = ""
 		}
-
+		workers := m["workers"]
+		if workers == nil {
+			workers = 100
+		}
 		bucket, ok := m["bucket"].(string)
 		if !ok {
 			return nil, fmt.Errorf("ds-storj: unable to convert bucket to string type")
@@ -95,6 +98,7 @@ func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 				Region:        region,
 				Endpoint:      endpoint,
 				RootDirectory: rootDirectory,
+				Workers:       workers.(int),
 			},
 		}, nil
 	}
