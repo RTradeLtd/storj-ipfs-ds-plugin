@@ -44,3 +44,13 @@ func NewConfig(accessKey, secretKey string) Config {
 		Secure:        false,
 	}
 }
+
+type dBatch struct {
+	d   *Datastore
+	ops map[string]dBatchOp
+}
+
+type dBatchOp struct {
+	val    []byte
+	delete bool
+}
