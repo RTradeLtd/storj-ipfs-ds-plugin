@@ -58,7 +58,7 @@ func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 		}
 		workers := m["workers"]
 		if workers == nil {
-			workers = 100
+			workers = 1000
 		}
 		bucket, ok := m["bucket"].(string)
 		if !ok {
