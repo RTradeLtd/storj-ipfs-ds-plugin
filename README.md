@@ -7,9 +7,17 @@ go-ipfs plugin to use STORJ as the storage backend
 * basic daemon run
 * `ipfs pin` commands
 
+## what works'ish
+
+* `ipfs add`
+  * noticing something which requires calling `ipfs add` multiple times in order for something to be successfully added.
+
 ## what doesnt work
 
-* `ipfs add` subcommands
+* data stored isn't saved across daemon restarts
+
+
+## demo 
 
 short video of daemon operation:
 https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG
