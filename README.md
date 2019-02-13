@@ -2,6 +2,14 @@
 
 go-ipfs plugin to use STORJ as the storage backend
 
+## what works and doesn't work
+
+* currently all that works is basic daemon running
+* any datastore operations (put for example) do not work yet as there is no Batch operation system yet
+
+short video of daemon operation:
+https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG
+
 ## notes
 
 * [ipfs/plugins.md](https://github.com/ipfs/go-ipfs/blob/master/docs/plugins.md)
