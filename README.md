@@ -30,9 +30,11 @@ go-ipfs plugin to use STORJ as the storage backend
       "mounts": [
         {
           "child": {
+            "accessKey": "...",
+            "secretKey": "...",
             "bucket": "go-ipfs-storj",
             "region": "us-east-1",
-            "regionEndpoint": "127.0.0.1:9000",
+            "endpoint": "127.0.0.1:9000",
             "rootDirectory": "",
             "type": "storj"
           },
@@ -56,4 +58,5 @@ go-ipfs plugin to use STORJ as the storage backend
     "HashOnRead": false,
     "BloomFilterSize": 10000000
   }, // ...
+}
 ```
