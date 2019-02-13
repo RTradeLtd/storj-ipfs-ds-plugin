@@ -14,7 +14,7 @@ go-ipfs plugin to use STORJ as the storage backend
 
 ## what doesnt work
 
-* data stored isn't saved across daemon restarts
+* data stored is saved across restarts, but i believe due to the sharding of files into pieces, and storing pieces across multiple storage nodes, the ipfs daemon thinks nothing is there due to not being able to reconstruct the pieces.
 
 
 ## demo 
