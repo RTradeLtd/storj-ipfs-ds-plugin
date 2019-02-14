@@ -21,3 +21,13 @@ type FSRepo struct {
 ```
 
 The s3 datastore will satisfy the `repo.Datastore` of the above struct, `config.Config` is handled as well. Not sure about the other parts
+
+
+## creating a custom repo
+
+```
+* use fsrepo
+* this link is how ipfs does initializes itthttps://github.com/ipfs/go-ipfs/blob/402af03196c4fa9fff62e9942992fe76963c082b/cmd/ipfs/init.go#L134-L178
+* need to create a go-ipfs config, call fsrepo.Init
+* you can then open it with fsrepo.Open
+```
