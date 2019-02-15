@@ -2,15 +2,15 @@ package node
 
 import (
 	"context"
-	"encoding/base64"
+	"encoding/json"
 	config "gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config"
-	ci "gx/ipfs/QmPvyPwuCgJ7pDmrKDxRtsScJgBaM5h4EpRL2qQJsmXf4n/go-libp2p-crypto"
-	peer "gx/ipfs/QmTRhk7cgjUf2gfQ3p2M9KPECNZEW9XUrmHcFCgog4cPgB/go-libp2p-peer"
 	core "gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/core"
-	repo "gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo"
+	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo"
 	ds "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore"
+	"os"
 
 	"github.com/RTradeLtd/storj-ipfs-ds-plugin/s3"
+	sPlugin "github.com/RTradeLtd/storj-ipfs-ds-plugin/storj"
 )
 
 // SNode is our custom built storj ipfs node
@@ -20,7 +20,7 @@ type SNode struct {
 }
 
 // NewNode generates our storj backed ipfs node
-func NewNode(accessKey, secretKey string) (*SNode, error) {
+func NewNode(accessKey, secretKey, ipfsConfigPath, repoPath string) (*SNode, error) {
 	datastoreConfig := s3.NewConfig(accessKey, secretKey)
 	datastore, err := s3.NewDatastore(datastoreConfig)
 	if err != nil {
@@ -32,32 +32,35 @@ func NewNode(accessKey, secretKey string) (*SNode, error) {
 			return nil, err
 		}
 	}
-	pk, _, err := ci.GenerateKeyPair(ci.Ed25519, 258)
-	if err != nil {
-		return nil, err
-	}
-	pid, err := peer.IDFromPrivateKey(pk)
-	if err != nil {
-		return nil, err
-	}
-	pkBytes, err := pk.Bytes()
-	if err != nil {
-		return nil, err
-	}
+	// genarate an empty node config
 	nodeConfig := config.Config{}
-	nodeConfig.Bootstrap = config.DefaultBootstrapAddresses
-	nodeConfig.Identity.PeerID = pid.Pretty()
-	nodeConfig.Identity.PrivKey = base64.StdEncoding.EncodeToString(pkBytes)
-	// WARNING: repo.Mock is not threadsafe we will need to move from this
-	mockRepo := repo.Mock{
-		C: nodeConfig,
-		D: datastore,
+	// open node config at provided path
+	f, err := os.Open(ipfsConfigPath)
+	if err != nil {
+		return nil, err
+	}
+	// decode the opened config file into our config struct
+	if err := json.NewDecoder(f).Decode(&nodeConfig); err != nil {
+		return nil, err
+	}
+	// add our custom config handler
+	if err := fsrepo.AddDatastoreConfigHandler("storj", sPlugin.DatastoreConfig); err != nil {
+		return nil, err
+	}
+	// init our repo configuration
+	if err := fsrepo.Init(repoPath, &nodeConfig); err != nil {
+		return nil, err
+	}
+	// open the repo configuration
+	repo, err := fsrepo.Open(repoPath)
+	if err != nil {
+		return nil, err
 	}
 	// create the node
 	host, err := core.NewNode(context.Background(), &core.BuildCfg{
 		Online:    true,
 		Permanent: true,
-		Repo:      &mockRepo,
+		Repo:      repo,
 		ExtraOpts: map[string]bool{
 			"ipnsps": true,
 		},

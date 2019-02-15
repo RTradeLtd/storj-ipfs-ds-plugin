@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 )
@@ -16,8 +17,15 @@ const (
 	secretKey = "q4I9t2MN/6bAgLkbF6uyS7jtQrXuNARcyrm2vvNA"
 )
 
+var (
+	homeDir        = os.Getenv("HOME")
+	ipfsDir        = homeDir + "/.ipfs"
+	ipfsConfigFile = ipfsDir + "/config"
+	repoDir        = ipfsDir + "/blocks"
+)
+
 func TestNode(t *testing.T) {
-	node, err := NewNode(accessKey, secretKey)
+	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, repoDir)
 	if err != nil {
 		t.Fatal(err)
 	}
