@@ -100,6 +100,7 @@ func (s *S3Bucket) Put(k ds.Key, value []byte) error {
 }
 
 func (s *S3Bucket) Get(k ds.Key) ([]byte, error) {
+	fmt.Println(s.Bucket)
 	resp, err := s.S3.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(s.s3Path(k.String())),
@@ -108,7 +109,7 @@ func (s *S3Bucket) Get(k ds.Key) ([]byte, error) {
 		return nil, parseError(err)
 	}
 	defer resp.Body.Close()
-
+	fmt.Println(resp.String())
 	return ioutil.ReadAll(resp.Body)
 }
 
@@ -146,6 +147,7 @@ func (s *S3Bucket) Delete(k ds.Key) error {
 }
 
 func (s *S3Bucket) Query(q dsq.Query) (dsq.Results, error) {
+	fmt.Println("running query", q)
 	if q.Orders != nil || q.Filters != nil {
 		return nil, fmt.Errorf("s3ds: filters or orders are not supported")
 	}
