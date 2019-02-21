@@ -173,8 +173,9 @@ func (d *Datastore) Close() error {
 // Batch is a batched datastore operations
 func (d *Datastore) Batch() (ds.Batch, error) {
 	return &dBatch{
-		d:   d,
-		ops: make(map[string]dBatchOp),
+		d:       d,
+		ops:     make(map[string]dBatchOp),
+		workers: d.Workers,
 	}, nil
 }
 
