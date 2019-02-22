@@ -1,46 +1,24 @@
 # storj-ipfs-ds-plugin
 
-go-ipfs plugin to use STORJ as the storage backend
 
-## what works
+This plugin is used to enable S3 datastore usage through STORJ. The immediate benefit to this is an immense amount of data durability, and redundancy not present with current IPFS node solutions. Typically to achieve this, you'll need to run many hosts, copies of the data, and hardware or software level data protection methods like RAID or ZFS. This is currently an experimental production, and it not advised to use this for production data. There are a few known bugs, and probably some hidden ones.
 
-* basic daemon run
-* `ipfs pin` commands
+Due to using the plugin system which is heavily dependent on gx, until further notice it's best to use the binaries in the `bin` folder. If you want to rebuild the `ipfs` binary you'll wnat to go into the `vendor` folder and build directory instead of using a prebuilt binary from a separate code-base.
 
-## what works'ish
+## warnings
 
-* `ipfs add`
-  * noticing something which requires calling `ipfs add` multiple times in order for something to be successfully added.
+* When uploading data, sometimes it may appear as if the upload has stalled. This is currently due to the Segments being uploaded sequentially, while the pieces (fragments of the segments) are uploaded in parallel.
 
-## what doesnt work
-
-* data stored is saved across restarts, but i believe due to the sharding of files into pieces, and storing pieces across multiple storage nodes, the ipfs daemon thinks nothing is there due to not being able to reconstruct the pieces.
-
+* sometimes after restarting your IPFS node, it may appear as if data has been lost by running `ipfs pin ls` and nothing showing up. This shouldn't always happen, but if it does you can verify data is stored by shutting down your node, and running `ipfs pin ls` a second time which should show the data. Obviously this is not viable in production, so this will be ironed out before recommending usage of this in production
 
 ## demo 
 
 short video of daemon operation:
 https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG
 
-## notes
-
-* [ipfs/plugins.md](https://github.com/ipfs/go-ipfs/blob/master/docs/plugins.md)
-* [example plugin](https://github.com/ipfs/go-ipfs-example-plugin/)
-* [ipfs/go-datastore](https://github.com/ipfs/go-datastore)
-* [aws sdk for minio](https://docs.minio.io/docs/how-to-use-aws-sdk-for-go-with-minio-server.html)
-* [s3 plugin pr](https://github.com/ipfs/go-ipfs/pull/5561)
-* [s3 plugin code](https://github.com/ipfs/go-ipfs/blob/1526a4a7b2be3eb7c8dfba15dd64a8c8ebf021d6/plugin/plugins/s3ds/s3ds.go)
-
-## development
-
-* The easiest way to develop this is to run a local version of the storj v3 network see this [awesome tutorial](https://medium.com/@kleffew/getting-started-with-the-storj-v3-test-network-storj-sdk-c835d992cdd9) which covers everything you'll need to know.
-
-## plugin
-
-* `Create` is used to create the actual datastore
-* `fsrepo.ConfigFromMap` is a function. not quite sure how it loads the configuration yet
-
 ## configuration
+
+The following is an example IPFS configuration to use this plugin.
 
 ```json
 ~/.ipfs/config example

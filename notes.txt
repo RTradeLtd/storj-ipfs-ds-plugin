@@ -1,0 +1,14 @@
+* running uplink on remote requires paying 2x bandwidth
+* local requires roughly double horsepower
+* next few days or weeks "libuplink" (replaces libstorj), abstracts logic behind minio
+
+
+* segments are uploade sequentially
+	* small time where the upload may appear stalled
+	* will be improved in the future
+	* > can always create issues to help identify issues
+
+
+* stefanb can spin up some storage nodes to talk to satellites
+	* will be unsigned
+	* keep in mind that we can move to signed (this would involve paying operators)
