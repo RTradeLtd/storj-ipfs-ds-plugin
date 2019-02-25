@@ -29,7 +29,9 @@ rs.min-threshold: 20
 rs.repair-threshold: 25
 # the desired total pieces for a segment. o.
 rs.success-threshold: 40
-``
+```
+
+* For performance benefits, it's probably advisable to run the satellite on the same machine as the ipfs node
 
 ## configuration
 
