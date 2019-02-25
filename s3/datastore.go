@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/labstack/gommon/log"
 )
 
 // NewDatastore is used to create our datastore against the minio gateway powered by storj
@@ -41,11 +42,12 @@ func NewDatastore(cfg Config) (*Datastore, error) {
 
 // Put is used to store some data
 func (d *Datastore) Put(k ds.Key, value []byte) error {
-	_, err := d.S3.PutObject(&s3.PutObjectInput{
+	resp, err := d.S3.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 		Body:   bytes.NewReader(value),
 	})
+	log.Info(resp.GoString())
 	return parseError(err)
 }
 

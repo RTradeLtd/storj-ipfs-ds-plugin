@@ -16,6 +16,21 @@ Due to using the plugin system which is heavily dependent on gx, until further n
 short video of daemon operation:
 https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG
 
+## using a remote setup
+
+* you will want to lower your rs (reed-solomon) settings:
+
+```yaml
+# the largest amount of pieces to encode to. n.
+rs.max-threshold: 50
+# the minimum pieces required to recover a segment. k.
+rs.min-threshold: 20
+# the minimum safe pieces before a repair is triggered. m.
+rs.repair-threshold: 25
+# the desired total pieces for a segment. o.
+rs.success-threshold: 40
+``
+
 ## configuration
 
 The following is an example IPFS configuration to use this plugin.

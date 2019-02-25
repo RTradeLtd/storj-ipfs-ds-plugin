@@ -88,7 +88,7 @@ func (db *dBatch) Commit() error {
 		}
 	}
 	if len(errs) > 0 {
-		return fmt.Errorf("s3ds: failed batch operation:\n%s", strings.Join(errs, "\n"))
+		return fmt.Errorf("storj: failed batch operation:\n%s", strings.Join(errs, "\n"))
 	}
 
 	return nil
