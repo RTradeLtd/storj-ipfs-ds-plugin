@@ -118,7 +118,7 @@ func (db *dBatch) newDeleteJob(objs []*s3.ObjectIdentifier) func() error {
 		}
 
 		if len(errs) > 0 {
-			return fmt.Errorf("failed to delete objects: %s", errs)
+			return fmt.Errorf("storj: failed to delete objects: %s", errs)
 		}
 
 		return nil
