@@ -182,7 +182,10 @@ func DatastoreConfig(m map[string]interface{}) (fsrepo.DatastoreConfig, error) {
 		return nil, fmt.Errorf("ds-storj: unable to convert rootDirectory to string type")
 	}
 	// permit empty string for root directory
-
+	logPath, ok := m["logPath"].(string)
+	if !ok {
+		return nil, fmt.Errorf("ds-storj: unable to convert logPath to string")
+	}
 	return &DSConfig{
 		cfg: s3.Config{
 			AccessKey:     accessKey.(string),
@@ -192,6 +195,7 @@ func DatastoreConfig(m map[string]interface{}) (fsrepo.DatastoreConfig, error) {
 			Endpoint:      endpoint,
 			RootDirectory: rootDirectory,
 			Workers:       workers.(int),
+			LogPath:       logPath,
 		},
 	}, nil
 }
