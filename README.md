@@ -56,7 +56,8 @@ The following is an example IPFS configuration to use this plugin.
             "endpoint": "127.0.0.1:9000",
             "rootDirectory": "",
             "workers" "100",
-            "type": "storj"
+            "type": "storj",
+            "logPath": "/var/log/storj-ipfs",
           },
           "mountpoint": "/blocks",
           "name": "storj",
