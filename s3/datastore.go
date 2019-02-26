@@ -42,24 +42,34 @@ func NewDatastore(cfg Config) (*Datastore, error) {
 
 // Put is used to store some data
 func (d *Datastore) Put(k ds.Key, value []byte) error {
+	log.Info("putting object")
 	resp, err := d.S3.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 		Body:   bytes.NewReader(value),
 	})
+	if err != nil {
+		log.Info("failed to put object")
+		return parseError(err)
+	}
+	log.Info("successfully put object")
 	log.Info(resp.GoString())
-	return parseError(err)
+	return nil
 }
 
 // Get is used to retrieve data from our storj backed s3 datastore
 func (d *Datastore) Get(k ds.Key) ([]byte, error) {
+	log.Info("getting object")
 	resp, err := d.S3.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
+		log.Info("failed to get object")
 		return nil, parseError(err)
 	}
+	log.Info("successfully got object")
+	log.Info(resp.GoString())
 	defer resp.Body.Close()
 
 	return ioutil.ReadAll(resp.Body)
@@ -67,45 +77,59 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 
 // Has is used to check if we already have an object matching this key
 func (d *Datastore) Has(k ds.Key) (exists bool, err error) {
+	log.Info("checking if object exists is datastore")
 	_, err = d.GetSize(k)
 	if err != nil {
+		log.Info("object does not exist")
 		if err == ds.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
+	log.Info("object exists")
 	return true, nil
 }
 
 // GetSize is used to retrieve the size of an object
 func (d *Datastore) GetSize(k ds.Key) (size int, err error) {
+	log.Info("getting object size")
 	resp, err := d.S3.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
+		log.Info("failed to get object size")
 		if s3Err, ok := err.(awserr.Error); ok && s3Err.Code() == "NotFound" {
 			return -1, ds.ErrNotFound
 		}
 		return -1, err
 	}
+	log.Info("successfully got object size")
+	log.Info(resp.GoString())
 	return int(*resp.ContentLength), nil
 }
 
 // Delete is used to remove an object from our datastore
 func (d *Datastore) Delete(k ds.Key) error {
-	_, err := d.S3.DeleteObject(&s3.DeleteObjectInput{
+	log.Info("deleting object")
+	resp, err := d.S3.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
-	return parseError(err)
+	if err != nil {
+		log.Info("failed to delete object")
+		return parseError(err)
+	}
+	log.Info("successfully deleted object")
+	log.Info(resp.GoString())
+	return nil
 }
 
 // Query is used to examine our s3 datastore and pull any objects
 // matching our given query
 func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 	if q.Orders != nil || q.Filters != nil {
-		return nil, fmt.Errorf("s3ds: filters or orders are not supported")
+		return nil, fmt.Errorf("storj: filters or orders are not supported")
 	}
 
 	limit := q.Limit + q.Offset
@@ -174,6 +198,7 @@ func (d *Datastore) Close() error {
 
 // Batch is a batched datastore operations
 func (d *Datastore) Batch() (ds.Batch, error) {
+	log.Info("returning batch operation handler")
 	return &dBatch{
 		d:       d,
 		ops:     make(map[string]dBatchOp),
