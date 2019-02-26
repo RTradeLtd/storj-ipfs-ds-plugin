@@ -9,11 +9,28 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/labstack/gommon/log"
+	"go.uber.org/zap"
 )
+
+// dBatch is used to handle batch based operations
+type dBatch struct {
+	d       *Datastore
+	l       *zap.SugaredLogger
+	ops     map[string]dBatchOp
+	workers int
+}
+
+// dBatchOp is a single batch operation
+type dBatchOp struct {
+	val    []byte
+	delete bool
+}
+
+var _ ds.Batching = (*Datastore)(nil)
 
 // Put is a batch based put operation
 func (db *dBatch) Put(k ds.Key, val []byte) error {
-	log.Info("adding batch put op")
+	db.l.Infow("adding batch put op", "key", k)
 	db.ops[k.String()] = dBatchOp{
 		val:    val,
 		delete: false,
@@ -23,7 +40,7 @@ func (db *dBatch) Put(k ds.Key, val []byte) error {
 
 // Delete is a batch based delete operation
 func (db *dBatch) Delete(k ds.Key) error {
-	log.Info("adding batch delete op")
+	db.l.Infow("adding batch delete op", "key", k)
 	db.ops[k.String()] = dBatchOp{
 		val:    nil,
 		delete: true,
@@ -33,6 +50,7 @@ func (db *dBatch) Delete(k ds.Key) error {
 
 // Commit is used to commit batch operations and finalize their actions
 func (db *dBatch) Commit() error {
+	db.l.Info("running batch commit")
 	var (
 		deleteObjs []*s3.ObjectIdentifier
 		putKeys    []ds.Key
@@ -98,12 +116,14 @@ func (db *dBatch) Commit() error {
 }
 
 func (db *dBatch) newPutJob(k ds.Key, value []byte) func() error {
+	db.l.Infow("new batch put job", "key", k)
 	return func() error {
 		return db.d.Put(k, value)
 	}
 }
 
 func (db *dBatch) newDeleteJob(objs []*s3.ObjectIdentifier) func() error {
+	db.l.Infow("new batch delete op", "objects", objs)
 	return func() error {
 		resp, err := db.d.S3.DeleteObjects(&s3.DeleteObjectsInput{
 			Bucket: aws.String(db.d.Bucket),

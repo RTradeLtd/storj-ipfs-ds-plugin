@@ -8,17 +8,30 @@ import (
 	"io/ioutil"
 	"path"
 
+	"go.uber.org/zap"
+
+	"github.com/RTradeLtd/storj-ipfs-ds-plugin/log"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/labstack/gommon/log"
 )
 
+// Datastore is our interface to minio
+type Datastore struct {
+	S3 *s3.S3
+	l  *zap.SugaredLogger
+	Config
+}
+
 // NewDatastore is used to create our datastore against the minio gateway powered by storj
-func NewDatastore(cfg Config) (*Datastore, error) {
-	log.Debug("using config", cfg)
+func NewDatastore(cfg Config, dev bool) (*Datastore, error) {
+	logger, err := log.NewLogger(cfg.LogPath, dev)
+	if err != nil {
+		return nil, err
+	}
+	logger.Infow("initialized logger", "config", cfg)
 	// Configure to use Minio Server
 	s3Config := &aws.Config{
 		// TODO: determine if we need session token
@@ -35,6 +48,7 @@ func NewDatastore(cfg Config) (*Datastore, error) {
 	d := &Datastore{
 		Config: cfg,
 		S3:     s3.New(s3Session),
+		l:      logger,
 	}
 	return d, nil
 }
@@ -43,34 +57,34 @@ func NewDatastore(cfg Config) (*Datastore, error) {
 
 // Put is used to store some data
 func (d *Datastore) Put(k ds.Key, value []byte) error {
-	log.Info("putting object")
+	d.l.Infow("putting object", "key", k)
 	resp, err := d.S3.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 		Body:   bytes.NewReader(value),
 	})
 	if err != nil {
-		log.Error("failed to put object", err)
+		d.l.Errorw("failed to put object", "error", err)
 		return parseError(err)
 	}
-	log.Info("successfully put object")
-	log.Debug(resp.GoString())
+	d.l.Info("successfully put object")
+	d.l.Debug(resp.GoString())
 	return nil
 }
 
 // Get is used to retrieve data from our storj backed s3 datastore
 func (d *Datastore) Get(k ds.Key) ([]byte, error) {
-	log.Info("getting object")
+	d.l.Infow("getting object", "key", k)
 	resp, err := d.S3.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		log.Error("failed to get object", err)
+		d.l.Errorw("failed to get object", "error", err)
 		return nil, parseError(err)
 	}
-	log.Info("successfully got object")
-	log.Debug(resp.GoString())
+	d.l.Info("successfully got object")
+	d.l.Debug(resp.GoString())
 	defer resp.Body.Close()
 
 	return ioutil.ReadAll(resp.Body)
@@ -78,58 +92,58 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 
 // Has is used to check if we already have an object matching this key
 func (d *Datastore) Has(k ds.Key) (exists bool, err error) {
-	log.Info("checking if object exists in datastore")
+	d.l.Infow("checking datastore for object", "key", k)
 	_, err = d.GetSize(k)
 	if err != nil {
-		log.Error("failed to check if object exists", err)
+		d.l.Errorw("failed to check datastore", "error", err)
 		if err == ds.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	log.Info("object exists")
+	d.l.Info("object exists")
 	return true, nil
 }
 
 // GetSize is used to retrieve the size of an object
 func (d *Datastore) GetSize(k ds.Key) (size int, err error) {
-	log.Info("getting object size")
+	d.l.Infow("getting object size", "key", k)
 	resp, err := d.S3.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		log.Error("failed to get object size", err)
+		d.l.Errorw("failed to get object size", "error", err)
 		if s3Err, ok := err.(awserr.Error); ok && s3Err.Code() == "NotFound" {
 			return -1, ds.ErrNotFound
 		}
 		return -1, err
 	}
-	log.Info("successfully got object size")
-	log.Debug(resp.GoString())
+	d.l.Infow("successfully got object size")
+	d.l.Debug(resp.GoString())
 	return int(*resp.ContentLength), nil
 }
 
 // Delete is used to remove an object from our datastore
 func (d *Datastore) Delete(k ds.Key) error {
-	log.Info("deleting object")
+	d.l.Infow("deleting object", "key", k)
 	resp, err := d.S3.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		log.Error("failed to delete object", err)
+		d.l.Errorw("failed to delete object", "error", err)
 		return parseError(err)
 	}
-	log.Info("successfully deleted object")
-	log.Debug(resp.GoString())
+	d.l.Info("successfully deleted object")
+	d.l.Debug(resp.GoString())
 	return nil
 }
 
 // Query is used to examine our s3 datastore and pull any objects
 // matching our given query
 func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
-	log.Info("executing query")
+	d.l.Infow("executing query", "query", q)
 	if q.Orders != nil || q.Filters != nil {
 		return nil, fmt.Errorf("storj: filters or orders are not supported")
 	}
@@ -146,7 +160,7 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 		MaxKeys: aws.Int64(int64(limit)),
 	})
 	if err != nil {
-		log.Error("failed to list objects", err)
+		d.l.Errorw("failed to list objects while running query", "error", err)
 		return nil, err
 	}
 
@@ -167,7 +181,7 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 				ContinuationToken: resp.NextContinuationToken,
 			})
 			if err != nil {
-				log.Error("failed to list objects", err)
+				d.l.Errorw("failed to list objects while running query", "error", err)
 				return dsq.Result{Error: err}, false
 			}
 		}
@@ -178,7 +192,7 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 		if !q.KeysOnly {
 			value, err := d.Get(ds.NewKey(entry.Key))
 			if err != nil {
-				log.Error("failed to get objects", err)
+				d.l.Errorw("failed to get objects while running query", "error", err)
 				return dsq.Result{Error: err}, false
 			}
 			entry.Value = value
@@ -203,9 +217,10 @@ func (d *Datastore) Close() error {
 
 // Batch is a batched datastore operations
 func (d *Datastore) Batch() (ds.Batch, error) {
-	log.Info("returning batch operation handler")
+	d.l.Info("returning batch operation handler")
 	return &dBatch{
 		d:       d,
+		l:       d.l.With("batch"),
 		ops:     make(map[string]dBatchOp),
 		workers: d.Workers,
 	}, nil
