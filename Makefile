@@ -20,7 +20,7 @@ vendor:
 	rm -rf vendor
 
 	# Update standard dependencies
-	dep ensure -v -update
+	dep ensure -v $(DEPFLAGS)
 
 	cp -r /tmp/gx vendor/gx
 	rm -rf vendor/gx/gx
