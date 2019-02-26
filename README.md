@@ -1,47 +1,51 @@
-# storj-ipfs-ds-plugin
+# Storj-IPFS-DS-Plugin (Alpha)
 
+This repository contains code to facilitate running an IPFS node using the Storj network as the datastorage backend. It does this leveraging a good chunk of code that was borrowed from [go-ds-s3](https://github.com/ipfs/go-ds-s3).
 
-This plugin is used to enable S3 datastore usage through STORJ. The immediate benefit to this is an immense amount of data durability, and redundancy not present with current IPFS node solutions. Typically to achieve this, you'll need to run many hosts, copies of the data, and hardware or software level data protection methods like RAID or ZFS. This is currently an experimental production, and it not advised to use this for production data. There are a few known bugs, and probably some hidden ones.
+The immediate benefit to a system like this is a mass amount of data protection (redundancy, decentralization, and durability) not present with traditional IPFS nodes. Traditional IPFS nodes require many copies of the data to spread it amongst multiple hosts and to achieve redundancy measures. However, when combined with STORJ a single IPFS node is atuomatically distributing data across a vast number of machines accomplishing:
 
-Due to using the plugin system which is heavily dependent on gx, until further notice it's best to use the binaries in the `bin` folder. If you want to rebuild the `ipfs` binary you'll wnat to go into the `vendor` folder and build directory instead of using a prebuilt binary from a separate code-base.
+1) Data distribution
+2) Data decentralization
+3) Data redundancy
+4) **Native data encryption**
 
-## warnings
+To see a short,but old video of daemon operation see [here](https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG)
 
-* When uploading data, sometimes it may appear as if the upload has stalled. This is currently due to the Segments being uploaded sequentially, while the pieces (fragments of the segments) are uploaded in parallel.
+## Warnings
 
-* sometimes after restarting your IPFS node, it may appear as if data has been lost by running `ipfs pin ls` and nothing showing up. This shouldn't always happen, but if it does you can verify data is stored by shutting down your node, and running `ipfs pin ls` a second time which should show the data. Obviously this is not viable in production, so this will be ironed out before recommending usage of this in production
+This is still very much experimental software and lots of issues are present. The most notable issue is that when storing data into S3 via Storj, anytime you restart a node it appears as if "data is lost".  Data is not actually lost, and it is still stored in the S3 interface, but running a command such as `ipfs pin ls` shows that nothing is stored. Additionally running `ipfs repo fsck` shows that barely any space is being taken up, and that there are no objects
 
-## demo 
+There are a few potential causes for this:
 
-short video of daemon operation:
-https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG
+1) the `$IPFS_PATH/blocks` and `$IPFS_PATH/datastore` not containing anything
+2) some of the encryption/path encryption that storj performs
+3) Data distribution due to reed-solomon
+4) ????
 
-## using a remote setup
+## Dependencies
 
-* you will want to lower your rs (reed-solomon) settings:
+All dependencies needed are shipped with this repository. It uses go-ipfs 0.4.18, with all IPFS dependencies managed by `gx`. Please see `package.json` for a detailed list of IPFS deependencies.
 
-```yaml
-# the largest amount of pieces to encode to. n.
-rs.max-threshold: 50
-# the minimum pieces required to recover a segment. k.
-rs.min-threshold: 20
-# the minimum safe pieces before a repair is triggered. m.
-rs.repair-threshold: 25
-# the desired total pieces for a segment. o.
-rs.success-threshold: 40
-```
+None IPFS dependencies are managed by `dep`
 
-* For performance benefits, it's probably advisable to run the satellite on the same machine as the ipfs node
+This has only been tested with go1.11+
 
-## configuration
+## Installation
 
-The following is an example IPFS configuration to use this plugin.
+The install process is simple, running `make install` will do the following (in order):
+
+1) build the ipfs daemon from bundled dependencies
+2) build the plugin
+3) install plugin into `~/.ipfs/plugins`
+
+You can then use the `ipfs` binary included in the `build` folder
+
+## Configuration
+
+You will need to update `$IPFS_PATH/config` to something like:
 
 ```json
-~/.ipfs/config example
-{
-    // ...
-    "Datastore": {
+  "Datastore": {
     "StorageMax": "10GB",
     "StorageGCWatermark": 90,
     "GCPeriod": "1h",
@@ -49,15 +53,14 @@ The following is an example IPFS configuration to use this plugin.
       "mounts": [
         {
           "child": {
-            "accessKey": "...",
-            "secretKey": "...",
-            "bucket": "go-ipfs-storj",
+            "accessKey": "45qhD6QdHjrNJ65vua16ZoRwEtTV",
+            "secretKey": "4MFwsyGXCuuND15Wt37P7MH8HvVV",
+            "bucket": "go-ipfs-storj-5",
             "region": "us-east-1",
-            "endpoint": "127.0.0.1:9000",
+            "endpoint": "http://127.0.0.1:9000",
             "rootDirectory": "",
-            "workers" "100",
             "type": "storj",
-            "logPath": "/var/log/storj-ipfs",
+            "logPath": ""
           },
           "mountpoint": "/blocks",
           "name": "storj",
@@ -77,7 +80,25 @@ The following is an example IPFS configuration to use this plugin.
       "type": "mount"
     },
     "HashOnRead": false,
-    "BloomFilterSize": 10000000
-  }, // ...
-}
+    "BloomFilterSize": 0
+  },
 ```
+
+You will then need to update `$IPFS_PATH/datastore_spec` to math the above:
+
+```json
+{"mounts":[{"bucket":"go-ipfs-storj-5","endpoint":"http://127.0.0.1:9000","mountpoint":"/blocks","region":"us-east-1","rootDirectory":""},{"mountpoint":"/","path":"datastore","type":"levelds"}],"type":"mount"}
+```
+
+When using a remote satellite, you'll want to update the rs (reed-solomon) settings of your Storj IPFS Gateway to something like:
+
+```yaml
+# the largest amount of pieces to encode to. n.
+rs.max-threshold: 50
+# the minimum pieces required to recover a segment. k.
+rs.min-threshold: 20
+# the minimum safe pieces before a repair is triggered. m.
+rs.repair-threshold: 25
+# the desired total pieces for a segment. o.
+rs.success-threshold: 40
+``
