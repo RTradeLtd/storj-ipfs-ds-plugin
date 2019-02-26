@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/labstack/gommon/log"
 )
 
 // Put is a batch based put operation
@@ -109,6 +110,7 @@ func (db *dBatch) newDeleteJob(objs []*s3.ObjectIdentifier) func() error {
 			},
 		})
 		if err != nil {
+			log.Error("failed to execute Delete Objects", err)
 			return err
 		}
 

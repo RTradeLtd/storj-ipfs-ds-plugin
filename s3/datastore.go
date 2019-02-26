@@ -49,7 +49,7 @@ func (d *Datastore) Put(k ds.Key, value []byte) error {
 		Body:   bytes.NewReader(value),
 	})
 	if err != nil {
-		log.Info("failed to put object")
+		log.Error("failed to put object", err)
 		return parseError(err)
 	}
 	log.Info("successfully put object")
@@ -65,7 +65,7 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		log.Info("failed to get object")
+		log.Error("failed to get object", err)
 		return nil, parseError(err)
 	}
 	log.Info("successfully got object")
@@ -80,7 +80,7 @@ func (d *Datastore) Has(k ds.Key) (exists bool, err error) {
 	log.Info("checking if object exists is datastore")
 	_, err = d.GetSize(k)
 	if err != nil {
-		log.Info("object does not exist")
+		log.Error("failed to check if object exists", err)
 		if err == ds.ErrNotFound {
 			return false, nil
 		}
@@ -98,7 +98,7 @@ func (d *Datastore) GetSize(k ds.Key) (size int, err error) {
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		log.Info("failed to get object size")
+		log.Error("failed to get object size", err)
 		if s3Err, ok := err.(awserr.Error); ok && s3Err.Code() == "NotFound" {
 			return -1, ds.ErrNotFound
 		}
@@ -117,7 +117,7 @@ func (d *Datastore) Delete(k ds.Key) error {
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		log.Info("failed to delete object")
+		log.Error("failed to delete object", err)
 		return parseError(err)
 	}
 	log.Info("successfully deleted object")
@@ -128,6 +128,7 @@ func (d *Datastore) Delete(k ds.Key) error {
 // Query is used to examine our s3 datastore and pull any objects
 // matching our given query
 func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
+	log.Info("executing query")
 	if q.Orders != nil || q.Filters != nil {
 		return nil, fmt.Errorf("storj: filters or orders are not supported")
 	}
@@ -144,6 +145,7 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 		MaxKeys: aws.Int64(int64(limit)),
 	})
 	if err != nil {
+		log.Error("failed to list objects", err)
 		return nil, err
 	}
 
@@ -164,6 +166,7 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 				ContinuationToken: resp.NextContinuationToken,
 			})
 			if err != nil {
+				log.Error("failed to list objects", err)
 				return dsq.Result{Error: err}, false
 			}
 		}
@@ -174,6 +177,7 @@ func (d *Datastore) Query(q dsq.Query) (dsq.Results, error) {
 		if !q.KeysOnly {
 			value, err := d.Get(ds.NewKey(entry.Key))
 			if err != nil {
+				log.Error("failed to get objects", err)
 				return dsq.Result{Error: err}, false
 			}
 			entry.Value = value
