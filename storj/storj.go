@@ -90,10 +90,9 @@ func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 			return nil, fmt.Errorf("ds-storj: unable to convert rootDirectory to string type")
 		}
 		// permit empty string for root directory
-		logPath := m["logPath"].(string)
-		if logPath == "" {
-			// set default log path
-			logPath = "/var/log/storj-ipfs"
+		logPath, ok := m["logPath"].(string)
+		if !ok {
+			return nil, fmt.Errorf("ds-storj: unable to convert logPath to string")
 		}
 		return &DSConfig{
 			cfg: s3.Config{
