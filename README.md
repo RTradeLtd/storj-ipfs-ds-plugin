@@ -1,4 +1,7 @@
+
 # Storj-IPFS-DS-Plugin (Alpha)
+
+## DO NOT USE FOR IMPORTANT DATA
 
 This repository contains code to facilitate running an IPFS node using the Storj network as the datastorage backend. It does this leveraging a good chunk of code that was borrowed from [go-ds-s3](https://github.com/ipfs/go-ds-s3).
 
@@ -7,13 +10,17 @@ The immediate benefit to a system like this is a mass amount of data protection 
 1) Data distribution
 2) Data decentralization
 3) Data redundancy
-4) **Native data encryption**
+4) *Native data encryption* (data is store within the Storj network encrypted)
 
 To see a short,but old video of daemon operation see [here](https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG)
 
 ## Warnings
 
-This is still very much experimental software and lots of issues are present. The most notable issue is that when storing data into S3 via Storj, anytime you restart a node it appears as if "data is lost".  Data is not actually lost, and it is still stored in the S3 interface, but running a command such as `ipfs pin ls` shows that nothing is stored. Additionally running `ipfs repo fsck` shows that barely any space is being taken up, and that there are no objects
+Being alpha level software there are a ton of gotchas please read the following in detail
+
+### Superficial Data Loss
+
+This is still very much experimental software and lots of issues are present. The most notable issue is that when storing data into S3 via Storj, anytime you restart a node it appears as if "data is lost".  Data is not actually lost, and it is still stored in the S3 interface, but running a command such as `ipfs pin ls` shows that nothing is stored. Additionally running `ipfs repo stat` shows that barely any space is being taken up, and that there are no objects
 
 There are a few potential causes for this:
 
@@ -21,6 +28,26 @@ There are a few potential causes for this:
 2) some of the encryption/path encryption that storj performs
 3) Data distribution due to reed-solomon
 4) ????
+
+### Inconsistencies
+
+There are numerous data inconsistencies (albeit superficial). For example note the following output from `ipfs repo stat`:
+
+```shell
+solidity@dark:~/go/src/github.com/RTradeLtd/storj-ipfs-ds-plugin/build$ ./ipfs repo stat
+NumObjects: 0
+RepoSize:   28881
+StorageMax: 10000000000
+RepoPath:   /home/solidity/.ipfs
+Version:    fs-repo@7
+```
+
+But now note the output from `ipfs pin ls | wc -l`:
+
+```shell
+solidity@dark:~/go/src/github.com/RTradeLtd/storj-ipfs-ds-plugin/build$ ./ipfs pin ls | wc -l
+162
+```
 
 ## Dependencies
 
