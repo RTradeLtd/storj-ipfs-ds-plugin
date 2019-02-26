@@ -10,3 +10,5 @@ import (
 var Plugins = []plugin.Plugin{
 	&storj.SJPlugin{},
 }
+
+func main() {}
