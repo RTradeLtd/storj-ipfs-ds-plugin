@@ -7,7 +7,7 @@ sudo: required
 
 install:
 - go get -u golang.org/x/lint/golint
-# - git submodule update --init
+- git submodule update --init
 
 before_script:
 - go vet ./...
