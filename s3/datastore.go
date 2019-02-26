@@ -18,6 +18,7 @@ import (
 
 // NewDatastore is used to create our datastore against the minio gateway powered by storj
 func NewDatastore(cfg Config) (*Datastore, error) {
+	log.Info("using config", cfg)
 	// Configure to use Minio Server
 	s3Config := &aws.Config{
 		// TODO: determine if we need session token
