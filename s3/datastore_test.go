@@ -10,6 +10,7 @@ var (
 	// default minio configs from our testenv
 	accessKey = "C03T49S17RP0APEZDK6M"
 	secretKey = "q4I9t2MN/6bAgLkbF6uyS7jtQrXuNARcyrm2vvNA"
+	logPath   = "./tmp"
 	// these will need to be populated with the entries
 	// generated from spinning up the storj sim network
 	storjAccessKey = os.Getenv("STORJ_ACCESS_KEY")
@@ -18,7 +19,7 @@ var (
 
 func Test_New_Config(t *testing.T) {
 
-	sConfig := NewConfig(accessKey, secretKey)
+	sConfig := NewConfig(accessKey, secretKey, logPath)
 	if sConfig.AccessKey != accessKey {
 		t.Fatal("failed to set correct access key")
 	}
@@ -33,13 +34,9 @@ func Test_New_Config(t *testing.T) {
 	}
 }
 
-func Test_Datastore(t *testing.T) {
-	if !testing.Short() {
-		accessKey = storjAccessKey
-		secretKey = storjSecretKey
-	}
-	cfg := NewConfig(accessKey, secretKey)
-	d, err := NewDatastore(cfg)
+func Test_Datastore_Non_Storj(t *testing.T) {
+	cfg := NewConfig(accessKey, secretKey, logPath)
+	d, err := NewDatastore(cfg, true)
 	if err != nil {
 		t.Fatal(err)
 	}

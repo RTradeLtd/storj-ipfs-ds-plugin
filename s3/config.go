@@ -1,7 +1,7 @@
 package s3
 
 // NewConfig is used to generate a config with defaults
-func NewConfig(accessKey, secretKey string) Config {
+func NewConfig(accessKey, secretKey, logPath string) Config {
 	return Config{
 		AccessKey:     accessKey,
 		SecretKey:     secretKey,
