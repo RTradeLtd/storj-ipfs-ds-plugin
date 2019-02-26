@@ -8,18 +8,6 @@
       "hash": "QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r",
       "name": "go-ipfs",
       "version": "0.4.18"
-    },
-    {
-      "author": "jbenet",
-      "hash": "QmUadX5EcvrBmxAV9sE7wUWtWSqxns5K84qKJBixmcT1w9",
-      "name": "go-datastore",
-      "version": "3.6.1"
-    },
-    {
-      "author": "jbenet",
-      "hash": "QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i",
-      "name": "go-datastore",
-      "version": "2.4.1"
     }
   ],
   "gxVersion": "0.14.0",
