@@ -2,7 +2,7 @@ package s3
 
 const (
 	defaultRegion = "us-east-1"
-	defaultBucket = "ipfs-datastore"
+	defaultBucket = "ipfs"
 	// listMax is the largest amount of objects you can request from S3 in a list
 	// call.
 	listMax = 1000

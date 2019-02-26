@@ -58,7 +58,7 @@ func NewDatastore(cfg Config, dev bool) (*Datastore, error) {
 // Put is used to store some data
 func (d *Datastore) Put(k ds.Key, value []byte) error {
 	d.l.Infow("putting object", "key", k)
-	resp, err := d.S3.PutObject(&s3.PutObjectInput{
+	_, err := d.S3.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 		Body:   bytes.NewReader(value),
@@ -68,7 +68,6 @@ func (d *Datastore) Put(k ds.Key, value []byte) error {
 		return parseError(err)
 	}
 	d.l.Info("successfully put object")
-	d.l.Debug(resp.GoString())
 	return nil
 }
 
@@ -84,7 +83,6 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 		return nil, parseError(err)
 	}
 	d.l.Info("successfully got object")
-	d.l.Debug(resp.GoString())
 	defer resp.Body.Close()
 
 	return ioutil.ReadAll(resp.Body)
@@ -120,14 +118,13 @@ func (d *Datastore) GetSize(k ds.Key) (size int, err error) {
 		return -1, err
 	}
 	d.l.Infow("successfully got object size")
-	d.l.Debug(resp.GoString())
 	return int(*resp.ContentLength), nil
 }
 
 // Delete is used to remove an object from our datastore
 func (d *Datastore) Delete(k ds.Key) error {
 	d.l.Infow("deleting object", "key", k)
-	resp, err := d.S3.DeleteObject(&s3.DeleteObjectInput{
+	_, err := d.S3.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(d.Bucket),
 		Key:    aws.String(d.s3Path(k.String())),
 	})
@@ -136,7 +133,6 @@ func (d *Datastore) Delete(k ds.Key) error {
 		return parseError(err)
 	}
 	d.l.Info("successfully deleted object")
-	d.l.Debug(resp.GoString())
 	return nil
 }
 
