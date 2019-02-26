@@ -25,10 +25,12 @@ var (
 	homeDir        = os.Getenv("HOME")
 	ipfsDir        = homeDir + "/.ipfs"
 	ipfsConfigFile = ipfsDir + "/config"
+	logDir         = "./tmp"
 )
 
 func TestNode(t *testing.T) {
-	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir, "./tmp")
+	t.Skip()
+	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir, logDir)
 	if err != nil {
 		t.Fatal(err)
 	}
