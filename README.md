@@ -14,6 +14,13 @@ The immediate benefit to a system like this is a mass amount of data protection 
 
 To see a short,but old video of daemon operation see [here](https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG)
 
+## Contents
+
+* `node` folder is a work-in-progress purpose-built IPFS node designed to use the Storj network as the data storage backend.
+* `s3` folder is a modified version of [go-ds-s3](https://github.com/ipfs/go-ds-s3) 
+* `storj` folder is where the actual plugin lives
+* `log` folder is a wrapper around the `zap` package by uber
+
 ## Warnings
 
 Being alpha level software there are a ton of gotchas please read the following in detail
