@@ -18,7 +18,7 @@ import (
 
 // NewDatastore is used to create our datastore against the minio gateway powered by storj
 func NewDatastore(cfg Config) (*Datastore, error) {
-	log.Info("using config", cfg)
+	log.Debug("using config", cfg)
 	// Configure to use Minio Server
 	s3Config := &aws.Config{
 		// TODO: determine if we need session token
@@ -54,7 +54,7 @@ func (d *Datastore) Put(k ds.Key, value []byte) error {
 		return parseError(err)
 	}
 	log.Info("successfully put object")
-	log.Info(resp.GoString())
+	log.Debug(resp.GoString())
 	return nil
 }
 
@@ -70,7 +70,7 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 		return nil, parseError(err)
 	}
 	log.Info("successfully got object")
-	log.Info(resp.GoString())
+	log.Debug(resp.GoString())
 	defer resp.Body.Close()
 
 	return ioutil.ReadAll(resp.Body)
@@ -78,7 +78,7 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 
 // Has is used to check if we already have an object matching this key
 func (d *Datastore) Has(k ds.Key) (exists bool, err error) {
-	log.Info("checking if object exists is datastore")
+	log.Info("checking if object exists in datastore")
 	_, err = d.GetSize(k)
 	if err != nil {
 		log.Error("failed to check if object exists", err)
@@ -106,7 +106,7 @@ func (d *Datastore) GetSize(k ds.Key) (size int, err error) {
 		return -1, err
 	}
 	log.Info("successfully got object size")
-	log.Info(resp.GoString())
+	log.Debug(resp.GoString())
 	return int(*resp.ContentLength), nil
 }
 
@@ -122,7 +122,7 @@ func (d *Datastore) Delete(k ds.Key) error {
 		return parseError(err)
 	}
 	log.Info("successfully deleted object")
-	log.Info(resp.GoString())
+	log.Debug(resp.GoString())
 	return nil
 }
 
@@ -210,44 +210,6 @@ func (d *Datastore) Batch() (ds.Batch, error) {
 		workers: d.Workers,
 	}, nil
 }
-
-// S3 FUNCTION CALLS
-
-// BucketExists is used to lookup if the designated bucket exists
-func (d *Datastore) BucketExists(name string) error {
-	listParam := &s3.ListBucketsInput{}
-	out, err := d.S3.ListBuckets(listParam)
-	if err != nil {
-		return parseError(err)
-	}
-	for _, v := range out.Buckets {
-		if *v.Name == name {
-			return nil
-		}
-	}
-	return ds.ErrNotFound
-}
-
-// CreateBucket is used to create a bucket
-func (d *Datastore) CreateBucket(name string) error {
-	createParam := &s3.CreateBucketInput{
-		Bucket: aws.String(name),
-	}
-	// create bucket ensure we have initialize client correct
-	_, err := d.S3.CreateBucket(createParam)
-	return parseError(err)
-}
-
-// DeleteBucket is used to remove the specified bucket
-func (d *Datastore) DeleteBucket(name string) error {
-	deleteParam := &s3.DeleteBucketInput{
-		Bucket: aws.String(name),
-	}
-	_, err := d.S3.DeleteBucket(deleteParam)
-	return parseError(err)
-}
-
-// HELPER FUNCTION CALLS
 
 // TODO: not sure if we need this, borrowing from the go-s3-ds ipfs repo
 func (d *Datastore) s3Path(p string) string {

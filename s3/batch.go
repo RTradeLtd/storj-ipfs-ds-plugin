@@ -13,6 +13,7 @@ import (
 
 // Put is a batch based put operation
 func (db *dBatch) Put(k ds.Key, val []byte) error {
+	log.Info("adding batch put op")
 	db.ops[k.String()] = dBatchOp{
 		val:    val,
 		delete: false,
@@ -22,6 +23,7 @@ func (db *dBatch) Put(k ds.Key, val []byte) error {
 
 // Delete is a batch based delete operation
 func (db *dBatch) Delete(k ds.Key) error {
+	log.Info("adding batch delete op")
 	db.ops[k.String()] = dBatchOp{
 		val:    nil,
 		delete: true,
