@@ -6,6 +6,7 @@ import (
 	ds "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore"
 	dsq "gx/ipfs/QmaRb5yNXKonhbkpNxNawoydk4N6es6b4fPj19sjEKsh5D/go-datastore/query"
 	"io/ioutil"
+	"os"
 	"path"
 
 	"go.uber.org/zap"
@@ -20,8 +21,9 @@ import (
 
 // Datastore is our interface to minio
 type Datastore struct {
-	S3 *s3.S3
-	l  *zap.SugaredLogger
+	S3           *s3.S3
+	l            *zap.SugaredLogger
+	debugLogging bool
 	Config
 }
 
@@ -46,9 +48,10 @@ func NewDatastore(cfg Config, dev bool) (*Datastore, error) {
 		return nil, err
 	}
 	d := &Datastore{
-		Config: cfg,
-		S3:     s3.New(s3Session),
-		l:      logger,
+		Config:       cfg,
+		S3:           s3.New(s3Session),
+		l:            logger,
+		debugLogging: os.Getenv("STORJ_IPFS_DEBUG") == "true",
 	}
 	return d, nil
 }
@@ -72,6 +75,9 @@ func (d *Datastore) Put(k ds.Key, value []byte) error {
 }
 
 // Get is used to retrieve data from our storj backed s3 datastore
+// we do not log errors here since checking if an object exists
+// is part of the IPFS operation process when adding a file
+// it avoids having to needlessly operate n files
 func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 	d.l.Infow("getting object", "key", k)
 	resp, err := d.S3.GetObject(&s3.GetObjectInput{
@@ -79,7 +85,9 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		d.l.Errorw("failed to get object", "error", err)
+		if d.debugLogging {
+			d.l.Errorw("failed to get object", "error", err)
+		}
 		return nil, parseError(err)
 	}
 	d.l.Info("successfully got object")
@@ -89,11 +97,16 @@ func (d *Datastore) Get(k ds.Key) ([]byte, error) {
 }
 
 // Has is used to check if we already have an object matching this key
+// we do not log errors here since checking if an object exists
+// is part of the IPFS operation process when adding a file
+// it avoids having to needlessly operate n files
 func (d *Datastore) Has(k ds.Key) (exists bool, err error) {
 	d.l.Infow("checking datastore for object", "key", k)
 	_, err = d.GetSize(k)
 	if err != nil {
-		d.l.Errorw("failed to check datastore", "error", err)
+		if d.debugLogging {
+			d.l.Errorw("failed to check datastore", "error", err)
+		}
 		if err == ds.ErrNotFound {
 			return false, nil
 		}
@@ -111,7 +124,9 @@ func (d *Datastore) GetSize(k ds.Key) (size int, err error) {
 		Key:    aws.String(d.s3Path(k.String())),
 	})
 	if err != nil {
-		d.l.Errorw("failed to get object size", "error", err)
+		if d.debugLogging {
+			d.l.Errorw("failed to get object size", "error", err)
+		}
 		if s3Err, ok := err.(awserr.Error); ok && s3Err.Code() == "NotFound" {
 			return -1, ds.ErrNotFound
 		}

@@ -46,3 +46,9 @@ func (d *Datastore) DeleteBucket(name string) error {
 	_, err := d.S3.DeleteBucket(deleteParam)
 	return parseError(err)
 }
+
+func (d *Datastore) logDebug(err error) {
+	if d.debugLogging == true {
+		d.l.Error(err)
+	}
+}
