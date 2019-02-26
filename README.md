@@ -111,7 +111,7 @@ You will need to update `$IPFS_PATH/config` to something like:
   },
 ```
 
-You will then need to update `$IPFS_PATH/datastore_spec` to math the above:
+You will then need to update `$IPFS_PATH/datastore_spec` to match the above:
 
 ```json
 {"mounts":[{"bucket":"go-ipfs-storj-5","endpoint":"http://127.0.0.1:9000","mountpoint":"/blocks","region":"us-east-1","rootDirectory":""},{"mountpoint":"/","path":"datastore","type":"levelds"}],"type":"mount"}
