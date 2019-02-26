@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/plugin"
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo"
+	"os"
 
 	"gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo"
 
@@ -89,7 +90,11 @@ func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 			return nil, fmt.Errorf("ds-storj: unable to convert rootDirectory to string type")
 		}
 		// permit empty string for root directory
-
+		logPath := m["logPath"].(string)
+		if logPath == "" {
+			// set default log path
+			logPath = "/var/log/storj-ipfs"
+		}
 		return &DSConfig{
 			cfg: s3.Config{
 				AccessKey:     accessKey.(string),
@@ -99,6 +104,7 @@ func (sp *SJPlugin) DatastoreConfigParser() fsrepo.ConfigFromMap {
 				Endpoint:      endpoint,
 				RootDirectory: rootDirectory,
 				Workers:       workers.(int),
+				LogPath:       logPath,
 			},
 		}, nil
 	}
@@ -121,7 +127,7 @@ func (dsc *DSConfig) DiskSpec() fsrepo.DiskSpec {
 
 // Create is used to create our s3 datastore
 func (dsc *DSConfig) Create(path string) (repo.Datastore, error) {
-	d, err := s3.NewDatastore(dsc.cfg)
+	d, err := s3.NewDatastore(dsc.cfg, os.Getenv("DEV_MODE") == "true")
 	if err != nil {
 		return nil, err
 	}

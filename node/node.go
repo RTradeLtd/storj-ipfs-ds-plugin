@@ -20,9 +20,9 @@ type SNode struct {
 }
 
 // NewNode generates our storj backed ipfs node
-func NewNode(accessKey, secretKey, ipfsConfigPath, repoPath string) (*SNode, error) {
-	datastoreConfig := s3.NewConfig(accessKey, secretKey)
-	datastore, err := s3.NewDatastore(datastoreConfig)
+func NewNode(accessKey, secretKey, ipfsConfigPath, repoPath, logPath string) (*SNode, error) {
+	datastoreConfig := s3.NewConfig(accessKey, secretKey, logPath)
+	datastore, err := s3.NewDatastore(datastoreConfig, os.Getenv("DEV_MODE") == "true")
 	if err != nil {
 		return nil, err
 	}

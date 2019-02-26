@@ -28,7 +28,7 @@ var (
 )
 
 func TestNode(t *testing.T) {
-	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir)
+	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir, "./tmp")
 	if err != nil {
 		t.Fatal(err)
 	}

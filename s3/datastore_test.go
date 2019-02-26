@@ -34,11 +34,7 @@ func Test_New_Config(t *testing.T) {
 	}
 }
 
-func Test_Datastore(t *testing.T) {
-	if !testing.Short() {
-		accessKey = storjAccessKey
-		secretKey = storjSecretKey
-	}
+func Test_Datastore_Non_Storj(t *testing.T) {
 	cfg := NewConfig(accessKey, secretKey, logPath)
 	d, err := NewDatastore(cfg, true)
 	if err != nil {
