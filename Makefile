@@ -28,8 +28,13 @@ vendor:
 	find . -name test-vectors -type d -exec rm -r {} +
 	@echo "===================          done           ==================="
 
+# install is used if you have already installed IPFS on your workstation
 .PHONY: install
 install: build-plugin install-plugin
+
+# first-install is used if you have never installed IPFS on your workstation
+.PHONY: first-install
+first-install: build-plugin init install-plugin
 
 .PHONY: install-plugin
 install-plugin:
@@ -42,6 +47,10 @@ build-plugin:
 	mkdir $(REPOROOT)/build
 	(cd $(IPFSCMDBUILDPATH) ; go build ; cp ipfs $(REPOROOT)/build)
 	(go build -o build/storj-ipfs-ds-plugin.go --buildmode=plugin ; chmod a+x build/storj-ipfs-ds-plugin.go)
+
+.PHONY: init
+init:
+	(cd $(REPOROOT)/build ; ./ipfs init)
 
 .PHONY: clean
 clean:
