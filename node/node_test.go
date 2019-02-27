@@ -30,6 +30,7 @@ var (
 )
 
 func TestNode(t *testing.T) {
+	t.Skip("skipping experimental features")
 	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir, logDir, nodeTestBucket)
 	if err != nil {
 		t.Fatal(err)

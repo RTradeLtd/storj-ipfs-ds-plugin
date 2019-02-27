@@ -1,12 +1,14 @@
 GXIPFSVERSION=QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r
 IPFSCMDBUILDPATH=vendor/gx/ipfs/$(GXIPFSVERSION)/go-ipfs/cmd/ipfs
-REPOROOT=$(GOPATH)/src/github.com/RTradeLtd/storj-ipfs-ds-plugin
+REPOROOT=$(shell pwd)
 IPFSPATH=$(HOME)/.ipfs
 
+# starts minio docker container for testing
 .PHONY: testenv
 testenv:
 	(cd testenv ; make minio)
 
+# cleans up test environment
 .PHONY: stop-testenv
 stop-testenv:
 	(cd testenv ; make clean)
@@ -36,22 +38,26 @@ install: build-plugin install-plugin
 .PHONY: first-install
 first-install: build-plugin init install-plugin
 
+# installs the plugin
 .PHONY: install-plugin
 install-plugin:
 	rm -rf $(IPFSPATH)/plugins
 	mkdir $(IPFSPATH)/plugins
 	install -Dm700 build/storj-ipfs-ds-plugin.go $(IPFSPATH)/plugins
 
+# builds the actual plugin and ipfs node
 .PHONY: build-plugin
 build-plugin:
 	mkdir $(REPOROOT)/build
 	(cd $(IPFSCMDBUILDPATH) ; go build ; cp ipfs $(REPOROOT)/build)
 	(go build -o build/storj-ipfs-ds-plugin.go --buildmode=plugin ; chmod a+x build/storj-ipfs-ds-plugin.go)
 
+# initializes an ipfs node, after first having built the plugin
 .PHONY: init
 init:
 	(cd $(REPOROOT)/build ; ./ipfs init)
 
+# cleans up build files
 .PHONY: clean
 clean:
 	rm -rf build
@@ -60,3 +66,9 @@ clean:
 .PHONY: gx
 gx:
 	go get -u -v github.com/whyrusleeping/gx
+
+
+# list make targets
+.PHONY: list
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
