@@ -14,6 +14,16 @@ The immediate benefit to a system like this is a mass amount of data protection 
 
 To see a short,but old video of daemon operation see [here](https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG)
 
+## Install
+
+If you don't want to build from source the plugin and binary are available over IPFS:
+
+* [ipfs daemon](https://gateway.temporal.cloud/ipfs/QmSdkwizYDuBFVtiMNhs6S5XaakCPJWwgmGHJFks9DMrzh)
+* [storj plugin](https://gateway.temporal.cloud/ipfs/QmTovRLGCHfLextTGyYrfL1hfRNPm67erD5EDaANFmdck3)
+
+If you want to build from source, and haven't already used IPFS on your workstation simply run `make first-install`
+If you want to build from source, and have already used IPFS on your workstation simply run `make install`
+
 ## Contents
 
 * `node` folder is a work-in-progress purpose-built IPFS node designed to use the Storj network as the data storage backend.
