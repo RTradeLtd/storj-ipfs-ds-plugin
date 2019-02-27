@@ -14,6 +14,33 @@ The immediate benefit to a system like this is a mass amount of data protection 
 
 To see a short,but old video of daemon operation see [here](https://gateway.temporal.cloud/ipfs/QmeFisZdZuHmnwaXEUBCaMJmoHQLLPn3DJfNiYwdCug5iG)
 
+## Install
+
+***Note: the build process assumes that the IPFS repository will be placed in `$HOME/.ipfs`, if you want to point to another path you'll need to edit the make file.***
+
+To build from, and install from source on a machine which already has an initialized IPFS instance, you can run the following command
+
+```shell
+git clone https://github.com/RTradeLtd/storj-ipfs-ds-plugin.git
+cd storj-ipfs-ds-plugin
+make install
+```
+
+If you aren't running this on a machine that already has an initialized IPFS node, running the following commands will handle the initialization process
+
+```shell
+git clone https://github.com/RTradeLtd/storj-ipfs-ds-plugin.git
+cd storj-ipfs-ds-plugin
+make first-install
+```
+
+## Contents
+
+* `node` folder is a work-in-progress purpose-built IPFS node designed to use the Storj network as the data storage backend.
+* `s3` folder is a modified version of [go-ds-s3](https://github.com/ipfs/go-ds-s3) 
+* `storj` folder is where the actual plugin lives
+* `log` folder is a wrapper around the `zap` package by uber
+
 ## Warnings
 
 Being alpha level software there are a ton of gotchas please read the following in detail
@@ -69,7 +96,7 @@ You can then use the `ipfs` binary included in the `build` folder
 
 ## Configuration
 
-You will need to update `$IPFS_PATH/config` to something like:
+You will need to update `$IPFS_PATH/config` as there is not yet functionality to do this for you. The following is an example configuration, which you will want to change depending on your environment:
 
 ```json
   "Datastore": {
@@ -111,7 +138,7 @@ You will need to update `$IPFS_PATH/config` to something like:
   },
 ```
 
-You will then need to update `$IPFS_PATH/datastore_spec` to match the above:
+You will then need to update `$IPFS_PATH/datastore_spec` to reflect the boave:
 
 ```json
 {"mounts":[{"bucket":"go-ipfs-storj-5","endpoint":"http://127.0.0.1:9000","mountpoint":"/blocks","region":"us-east-1","rootDirectory":""},{"mountpoint":"/","path":"datastore","type":"levelds"}],"type":"mount"}
