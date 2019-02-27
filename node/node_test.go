@@ -16,9 +16,10 @@ import (
 */
 
 const (
-	accessKey = "C03T49S17RP0APEZDK6M"
-	secretKey = "q4I9t2MN/6bAgLkbF6uyS7jtQrXuNARcyrm2vvNA"
-	testCID   = "QmS4ustL54uo8FzR9455qaxZwuMiUhyvMcX9Ba8nUH4uVv"
+	accessKey      = "C03T49S17RP0APEZDK6M"
+	secretKey      = "q4I9t2MN/6bAgLkbF6uyS7jtQrXuNARcyrm2vvNA"
+	testCID        = "QmS4ustL54uo8FzR9455qaxZwuMiUhyvMcX9Ba8nUH4uVv"
+	nodeTestBucket = "node-test-bucket"
 )
 
 var (
@@ -29,8 +30,7 @@ var (
 )
 
 func TestNode(t *testing.T) {
-	t.Skip()
-	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir, logDir)
+	node, err := NewNode(accessKey, secretKey, ipfsConfigFile, ipfsDir, logDir, nodeTestBucket)
 	if err != nil {
 		t.Fatal(err)
 	}
