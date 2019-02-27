@@ -15,8 +15,14 @@ import (
 // to function as the storage backend for a go-ipfs node.
 type SJPlugin struct{}
 
-// DatastoreType is the type of datastore name
-var DatastoreType = "storj"
+var (
+	// DatastoreType is the type of datastore name
+	DatastoreType = "storj"
+	// Name is the plugin name
+	name = "ds-storj"
+	// Version is the plugin version
+	version = "v0.0.0"
+)
 
 var _ plugin.PluginDatastore = (*SJPlugin)(nil)
 
