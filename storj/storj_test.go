@@ -11,8 +11,8 @@ const (
 	expectedName          = "ds-storj"
 	expectedVersion       = "v0.0.0"
 	expectedDatastoreType = "storj"
-	accessKey             = "accessKey123"
-	secretKey             = "secretKey123"
+	accessKey             = "C03T49S17RP0APEZDK6M"
+	secretKey             = "q4I9t2MN/6bAgLkbF6uyS7jtQrXuNARcyrm2vvNA"
 	pluginTestBucket      = "plugin-test-bucket"
 )
 
