@@ -5,7 +5,7 @@
 
 This repository contains code to facilitate running an IPFS node using the Storj network as the datastorage backend. It does this leveraging a good chunk of code that was borrowed from [go-ds-s3](https://github.com/ipfs/go-ds-s3).
 
-The immediate benefit to a system like this is a mass amount of data protection (redundancy, decentralization, and durability) not present with traditional IPFS nodes. Traditional IPFS nodes require many copies of the data to spread it amongst multiple hosts and to achieve redundancy measures. However, when combined with STORJ a single IPFS node is atuomatically distributing data across a vast number of machines accomplishing:
+The immediate benefit to a system like this is a mass amount of data protection (redundancy, decentralization, and durability) not present with traditional IPFS nodes. Traditional IPFS nodes require many copies of the data to spread it amongst multiple hosts and to achieve redundancy measures. However, when combined with Storj a single IPFS node is atuomatically distributing data across a vast number of machines accomplishing:
 
 1) Data distribution
 2) Data decentralization
