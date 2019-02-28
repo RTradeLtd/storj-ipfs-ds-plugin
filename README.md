@@ -41,24 +41,14 @@ STORJ_ACCESS_KEY=...
 STORJ_SECRET_KEY=...
 ```
 
-
 ## Developing
 
 This uses the `0.4.18` release of the IPFS code base, with a few hacks to get the ipfs daemon to recognize `storj` as a valid configuration profile:
 
-After making any changes to `fsrepo` run the following commands:
+After making any changes to `fsrepo` run `make fsrepo` to update the version used by the bundled go-ipfs dependency
 
-```shell
-rm -rf ./vendor/gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo
-cp -r fsrepo ./vendor/gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo
-```
+After making any changes to `go-ipfs-config` run `make go-ipfs-config` to update the version used by the bundled go-ipfs dependency
 
-After making any changes to `go-ipfs-config` run the following commands:
-
-```shell
-rm -rf ./vendor/gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config
-cp -r go-ipfs-config ./vendor/gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config
-```
 
 ## Contents
 

@@ -30,6 +30,18 @@ vendor:
 	find . -name test-vectors -type d -exec rm -r {} +
 	@echo "===================          done           ==================="
 
+# used to update the fsrepo package used by ipfs
+.PHONY: fsrepo
+fsrepo:
+	rm -rf ./vendor/gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo
+	cp -r fsrepo ./vendor/gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo
+
+# used to update the go-ipfs-config package used by ipfs
+.PHONY: go-ipfs-config
+go-ipfs-config:
+	rm -rf ./vendor/gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config
+	cp -r go-ipfs-config ./vendor/gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config
+
 # install is used if you have already installed IPFS on your workstation
 .PHONY: install
 install: build-plugin install-plugin
