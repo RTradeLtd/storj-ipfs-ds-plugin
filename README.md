@@ -34,6 +34,22 @@ cd storj-ipfs-ds-plugin
 make first-install
 ```
 
+When running `ipfs init --profile=storj` (which is what `make first-install`) does, you can automatically configure your s3 access key, and s3 secret key with the following environment variables, otherwise you'll have to manually edit `$IPFS_PATH/config`
+
+```shell
+STORJ_ACCESS_KEY=...
+STORJ_SECRET_KEY=...
+```
+
+## Developing
+
+This uses the `0.4.18` release of the IPFS code base, with a few hacks to get the ipfs daemon to recognize `storj` as a valid configuration profile:
+
+After making any changes to `fsrepo` run `make fsrepo` to update the version used by the bundled go-ipfs dependency
+
+After making any changes to `go-ipfs-config` run `make go-ipfs-config` to update the version used by the bundled go-ipfs dependency
+
+
 ## Contents
 
 * `node` folder is a work-in-progress purpose-built IPFS node designed to use the Storj network as the data storage backend.
