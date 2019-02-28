@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"os"
+	"time"
+)
 
 // Transformer is a function which takes configuration and applies some filter to it
 type Transformer func(c *Config) error
@@ -108,8 +111,8 @@ Inverse profile of the test profile.`,
 						"name":       "storj",
 						"type":       "log",
 						"child": map[string]interface{}{
-							"accessKey":     "abc123",
-							"secretKey":     "abc123",
+							"accessKey":     os.Getenv("STORJ_ACCESS_KEY"),
+							"secretKey":     os.Getenv("STORJ_SECRET_KEY"),
 							"bucket":        "ipfs",
 							"region":        "us-east-1",
 							"endpoint":      "http://127.0.0.1:9000",
