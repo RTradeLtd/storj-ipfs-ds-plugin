@@ -101,20 +101,33 @@ Inverse profile of the test profile.`,
 		Description: "Replaces default datastore config with experimental storj",
 		Transform: func(c *Config) error {
 			c.Datastore.Spec = map[string]interface{}{
-				"mounts": map[string]interface{}{
-					"child": map[string]interface{}{
-						"accessKey":     "abc123",
-						"secretKey":     "abc123",
-						"bucket":        "ipfs",
-						"region":        "us-east-1",
-						"endpoint":      "http://127.0.0.1:9000",
-						"rootDirectory": "",
-						"type":          "storj",
-						"logPath":       "",
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/blocks",
+						"name":       "storj",
+						"type":       "log",
+						"child": map[string]interface{}{
+							"accessKey":     "abc123",
+							"secretKey":     "abc123",
+							"bucket":        "ipfs",
+							"region":        "us-east-1",
+							"endpoint":      "http://127.0.0.1:9000",
+							"rootDirectory": "",
+							"type":          "storj",
+							"logPath":       "",
+						},
 					},
-					"mountpoint": "/blocks",
-					"name":       "storj",
-					"type":       "log",
+					map[string]interface{}{
+						"child": map[string]interface{}{
+							"compression": "none",
+							"path":        "datastore",
+							"type":        "levelds",
+						},
+						"mountpoint": "/",
+						"prefix":     "leveldb.datastore",
+						"type":       "measure",
+					},
 				},
 			}
 			return nil
