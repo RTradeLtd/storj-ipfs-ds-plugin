@@ -55,7 +55,7 @@ build-plugin:
 # initializes an ipfs node, after first having built the plugin
 .PHONY: init
 init:
-	(cd $(REPOROOT)/build ; ./ipfs init)
+	(cd $(REPOROOT)/build ; ./ipfs init --profile=storj)
 
 # cleans up build files
 .PHONY: clean
