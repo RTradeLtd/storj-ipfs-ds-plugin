@@ -34,6 +34,14 @@ cd storj-ipfs-ds-plugin
 make first-install
 ```
 
+When running `ipfs init --profile=storj` (which is what `make first-install`) does, you can automatically configure your s3 access key, and s3 secret key with the following environment variables, otherwise you'll have to manually edit `$IPFS_PATH/config`
+
+```shell
+STORJ_ACCESS_KEY=...
+STORJ_SECRET_KEY=...
+```
+
+
 ## Developing
 
 This uses the `0.4.18` release of the IPFS code base, with a few hacks to get the ipfs daemon to recognize `storj` as a valid configuration profile:
