@@ -97,6 +97,42 @@ Inverse profile of the test profile.`,
 			return nil
 		},
 	},
+	"storj": {
+		Description: "Replaces default datastore config with experimental storj",
+		Transform: func(c *Config) error {
+			c.Datastore.Spec = map[string]interface{}{
+				"type": "mount",
+				"mounts": []interface{}{
+					map[string]interface{}{
+						"mountpoint": "/blocks",
+						"name":       "storj",
+						"type":       "log",
+						"child": map[string]interface{}{
+							"accessKey":     "abc123",
+							"secretKey":     "abc123",
+							"bucket":        "ipfs",
+							"region":        "us-east-1",
+							"endpoint":      "http://127.0.0.1:9000",
+							"rootDirectory": "",
+							"type":          "storj",
+							"logPath":       "",
+						},
+					},
+					map[string]interface{}{
+						"child": map[string]interface{}{
+							"compression": "none",
+							"path":        "datastore",
+							"type":        "levelds",
+						},
+						"mountpoint": "/",
+						"prefix":     "leveldb.datastore",
+						"type":       "measure",
+					},
+				},
+			}
+			return nil
+		},
+	},
 	"badgerds": {
 		Description: `Replaces default datastore configuration with experimental
 badger datastore.
