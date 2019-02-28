@@ -34,6 +34,24 @@ cd storj-ipfs-ds-plugin
 make first-install
 ```
 
+## Developing
+
+This uses the `0.4.18` release of the IPFS code base, with a few hacks to get the ipfs daemon to recognize `storj` as a valid configuration profile:
+
+After making any changes to `fsrepo` run the following commands:
+
+```shell
+rm -rf ./vendor/gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo
+cp -r fsrepo ./vendor/gx/ipfs/QmUJYo4etAQqFfSS2rarFAE97eNGB8ej64YkRT2SmsYD4r/go-ipfs/repo/fsrepo
+```
+
+After making any changes to `go-ipfs-config` run the following commands:
+
+```shell
+rm -rf ./vendor/gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config
+cp -r go-ipfs-config ./vendor/gx/ipfs/QmPEpj17FDRpc7K1aArKZp3RsHtzRMKykeK9GVgn4WQGPR/go-ipfs-config
+```
+
 ## Contents
 
 * `node` folder is a work-in-progress purpose-built IPFS node designed to use the Storj network as the data storage backend.
